@@ -13,7 +13,13 @@ export class JWTAdapter{
         });
     }
 
-    static validateToken(){
-        return 'validated';
+    static async validateToken(token: string, seed: string){
+        return new Promise(resolve => {
+            jwt.verify(token, seed, (error, decode) => {
+                if(error) return resolve(null);
+
+                resolve(decode);
+            });
+        });
     }
 }

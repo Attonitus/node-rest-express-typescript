@@ -4,13 +4,17 @@ import { JWTAdapter } from "../../config/jwt.adapter";
 import { UserModel } from "../../data";
 import { CustomError, RegisterUserDto, UserEntity } from "../../domain";
 import { LoginUserDto } from "../../domain/dtos/auth/login-user.dto";
+import { EmailService } from "./email.service";
 
 
 const SEED = envs.JWT_SECRET_KEY;
+const WEBSITE_URL = envs.WEBSITE_URL;
 
 export class AuthService{
 
-    constructor(){}
+    constructor(
+        private emailService: EmailService
+    ){}
 
 
     async registerUser(registerUserDto: RegisterUserDto){
@@ -26,11 +30,18 @@ export class AuthService{
             
             await user.save();
 
+            //send email
+            const isSent = await this.sendEmailValidationLink(user.email, WEBSITE_URL);
+            if(!isSent) throw CustomError.internalServer('Error sending email');
+
             const {password, ...userInfo} = UserEntity.fromObject(user);
+
+            const token = await JWTAdapter.generateToken({ id: userInfo.id}, SEED);
+            if(!token) throw CustomError.internalServer('Error crating JWT');
 
             return {
                 user: userInfo,
-                token: 'ABCD'
+                token
             };
 
         } catch (error) {
@@ -53,7 +64,7 @@ export class AuthService{
 
             const {password, ...userInfo} = UserEntity.fromObject(userExist);
 
-            const token = await JWTAdapter.generateToken({ id: userInfo.id, email: userInfo.email }, SEED);
+            const token = await JWTAdapter.generateToken({ id: userInfo.id}, SEED);
             if(!token) throw CustomError.internalServer('Error crating JWT');
 
             return {
@@ -64,5 +75,43 @@ export class AuthService{
         } catch (error) {
             throw CustomError.internalServer(`${error}`);
         }
+    }
+
+    private async sendEmailValidationLink(email : string, websiteUrl: string){
+        const token = await JWTAdapter.generateToken({ email }, SEED);
+        if(!token) throw CustomError.internalServer('Error creating JWT');
+
+        const link = `${websiteUrl}/api/auth/verifiedMail/${token}`;
+
+        const html = `
+        <h1>Validate your email</h1>
+        <p>Thank you for use this website. To complete your register please validate your email give click here: </p>
+        <a href="${link}">Click here</a>
+        `
+
+        this.emailService.sendMail({
+            to: email,
+            subject: "Validate your email",
+            html
+        });
+
+        return true;
+    }
+
+    async validateEmail(token:string){
+        const payload = await JWTAdapter.validateToken(token, SEED);
+        if(!payload) throw CustomError.notAuthorized('Invalid token');
+
+        const { email } = payload as {email: string};
+        if(!email) throw CustomError.internalServer('Email not in token');
+
+        const user = await UserModel.findOne({ email });
+        if(!user) throw CustomError.internalServer('Email not exist');
+
+        user.emailValidated = true;
+
+        await user.save();
+        return true;
+
     }
 }

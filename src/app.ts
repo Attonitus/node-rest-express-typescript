@@ -18,7 +18,8 @@ async function main(){
 
     const server = new Server({
         port: envs.PORT,
-        router: AppRoutes.routes
+        router: AppRoutes.routes,
+        ngrok_auth: envs.NGROK_AUTHTOKEN
     });
 
     server.start();

@@ -1,10 +1,10 @@
 import express, { Router } from "express"
 
 
-
 interface Options{
     port : number,
     router: Router,
+    ngrok_auth : string;
     public_path?: string
 }
 
@@ -13,13 +13,15 @@ export class Server{
     private readonly app = express();
     private readonly port: number;
     private readonly router : Router;
+    private readonly ngrok_auth : string;
     private readonly public_path? : string;
 
     constructor(options: Options){
-        const {port, router, public_path} = options;
+        const {port, router, public_path, ngrok_auth} = options;
         this.port = port;
         this.router = router;
         this.public_path = public_path; 
+        this.ngrok_auth = ngrok_auth;
     }
 
 
@@ -37,6 +39,7 @@ export class Server{
         this.app.listen(this.port, () => {
             console.log(`Server running on http://localhost:${this.port}`);
         }); 
+
     }
 
 

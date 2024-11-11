@@ -11,6 +11,5 @@ export const envs = {
     MAILER_EMAIL: get('MAILER_EMAIL').required().asString(),
     MAILER_SECRET_KEY: get('MAILER_SECRET_KEY').required().asString(),
     WEBSITE_URL: get('WEBSITE_URL').required().asString(),
-    NGROK_AUTHTOKEN: get('NGROK_AUTHTOKEN').required().asString(),
-
+    DEV_MAIL: get('DEV_MAIL').default('true').asBool(),
 }

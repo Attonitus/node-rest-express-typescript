@@ -13,12 +13,12 @@ export class JWTAdapter{
         });
     }
 
-    static async validateToken(token: string, seed: string){
+    static async validateToken<T>(token: string, seed: string): Promise<T | null>{
         return new Promise(resolve => {
             jwt.verify(token, seed, (error, decode) => {
                 if(error) return resolve(null);
 
-                resolve(decode);
+                resolve(decode as T);
             });
         });
     }

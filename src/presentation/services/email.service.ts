@@ -14,7 +14,8 @@ export class EmailService{
     constructor(
         private readonly mailerService: string,
         private readonly mailerEmail: string,
-        private readonly mailerSecretKet: string
+        private readonly mailerSecretKet: string,
+        private readonly devMailer: boolean
     ){
         this.transporter = createTransport({
             service: mailerService,
@@ -27,6 +28,9 @@ export class EmailService{
 
     async sendMail( options : IEmailOptions): Promise<Boolean>{
         try {
+
+            if(this.devMailer) return true;
+
             const {to, subject, html} = options;
     
             await this.transporter.sendMail({

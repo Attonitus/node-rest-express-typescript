@@ -27,4 +27,13 @@ const userSchema = new Schema({
     }
 });
 
+userSchema.set('toJSON', {
+    virtuals: true,
+    versionKey: false,
+    transform: function(doc, rec, options){
+        delete rec._id,
+        delete rec.password
+    }
+});
+
 export const UserModel = model('User', userSchema);

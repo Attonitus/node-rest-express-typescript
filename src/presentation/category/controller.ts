@@ -52,14 +52,24 @@ export class CategoryController{
     }
 
     update = (req:Request , res: Response) => {
-        const [error, categoryDto] = CategoryDto.create(req.body);
+        const {id} = req.params;
+        const [error, categoryDto] = CategoryDto.update(req.body);
         if(error){
             res.status(400).json({error});
             return;
         }
 
-        this.categoryService.create(categoryDto!, req.body.user)
-        .then( category => res.status(201).json(category))
+        this.categoryService.update(categoryDto!, req.body.user, id)
+        .then( category => res.status(200).json(category))
         .catch(error => this.handleError(error, res));
     }
+
+    delete = (req: Request, res: Response) => {
+        const {id} = req.params;
+
+        this.categoryService.delete(id, req.body.user)
+        .then(message => res.json({message}))
+        .catch(error => this.handleError(error, res));
+    }
+
 }

@@ -4,7 +4,6 @@ import express, { Router } from "express"
 interface Options{
     port : number,
     router: Router,
-    ngrok_auth : string;
     public_path?: string
 }
 

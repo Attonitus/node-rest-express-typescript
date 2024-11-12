@@ -17,6 +17,8 @@ export class CategoryRoutes{
         router.get("/", controller.getAll);
         router.get("/:id", controller.getById);
         router.post("/", [AuthMiddleware.validateJWT], controller.create);
+        router.delete("/:id", [AuthMiddleware.validateJWT], controller.delete);
+        router.put("/:id", [AuthMiddleware.validateJWT], controller.update);
 
         return router;
     }
